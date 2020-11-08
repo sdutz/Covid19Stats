@@ -1,8 +1,10 @@
 import wx
 import re
+import os
 import requests
 import datetime
 import statistics
+import configparser
 
 class CowWnd(wx.Frame): 
     def __init__(self, parent, title): 
@@ -11,7 +13,10 @@ class CowWnd(wx.Frame):
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
-
+        self.region = "Lombardia"
+        self.city = "Bergamo"
+        self.iniFile = os.path.realpath(__file__) [:-3] + '.ini'
+        self.loadConfig()
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
 
@@ -20,11 +25,14 @@ class CowWnd(wx.Frame):
         static = wx.StaticText(self.panel, label = "Regione", style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         self.regions = wx.Choice(self.panel, choices = regions)
+        self.regions.SetSelection(regions.index(self.region))
         box.Add(self.regions, pos = (0, 1), flag = wx.EXPAND|wx.ALL, border = 5) 
 
         static = wx.StaticText(self.panel, label = "Provincia", style = wx.ALIGN_LEFT)   
-        box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5) 
-        self.cities = wx.Choice(self.panel, choices = list(self.italy[regions[0]]))
+        box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5)
+        cities = list(self.italy[self.region])
+        self.cities = wx.Choice(self.panel, choices = cities)
+        self.cities.SetSelection(cities.index(self.city))
         box.Add(self.cities, pos = (1, 1), flag = wx.EXPAND|wx.ALL, border = 5)
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER) 
@@ -39,6 +47,7 @@ class CowWnd(wx.Frame):
         self.Show() 
 
     def onClose(self, event):
+        self.saveConfig()
         self.Destroy()
 
     def initItaly(self):
@@ -65,6 +74,21 @@ class CowWnd(wx.Frame):
         for key in self.italy:
             self.italy[key].sort()
 
+    def loadConfig(self):
+        config = configparser.ConfigParser()
+        config.read(self.iniFile)
+        if "General" in config.sections():
+            self.region = config["General"]["Region"]
+            self.city   = config["General"]["City"]
+
+    def saveConfig(self):
+        config = configparser.ConfigParser()
+        config["General"] = {}
+        config["General"]["Region"] = self.regions.GetString( self.regions.GetSelection())
+        config["General"]["City"] = self.cities.GetString( self.cities.GetSelection())
+        with open( self.iniFile, 'w') as configFile:
+            config.write(configFile)
+
     def OnRegions(self, event):
         self.cities.SetItems(self.italy[self.regions.GetString(self.regions.GetSelection())])
         self.updateRes()
@@ -87,7 +111,8 @@ class CowWnd(wx.Frame):
             res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
             res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
             res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n\n'
-            res += 'fonte: ' + self.baseUrl + '\n'
+            res += 'fonte: ' + self.baseUrl + '\n\n'
+            res += 'Made by sdutz'
         self.result.SetLabel(res)
 
     def OnCities(self, event):
