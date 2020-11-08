@@ -6,40 +6,39 @@ import statistics
 
 class CowWnd(wx.Frame): 
     def __init__(self, parent, title): 
-        super(CowWnd, self).__init__(parent, title = title,size = (400,300))
+        super(CowWnd, self).__init__(parent, title = title,size = (250,250), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.italy = {}
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
+        self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
 
         self.panel = wx.Panel(self) 
-        box = wx.BoxSizer(wx.VERTICAL) 
+        box = wx.GridBagSizer()
 
         regions = list(self.italy.keys())
 
-        static = wx.StaticText(self.panel, label = "Regione", style = wx.ALIGN_CENTRE) 
-        box.Add(static, 0, wx.EXPAND|wx.ALL, 5)
+        static = wx.StaticText(self.panel, label = "Regione", style = wx.LEFT) 
+        box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         self.regions = wx.Choice(self.panel, choices = regions)
-        box.Add(self.regions, 1, wx.EXPAND|wx.ALL, 5) 
+        box.Add(self.regions, pos = (0, 1), flag = wx.EXPAND|wx.ALL, border = 5) 
 
-        static = wx.StaticText(self.panel, label = "Provincia", style = wx.ALIGN_CENTRE)   
-        box.Add(static, 0, wx.EXPAND|wx.ALL, 5) 
+        static = wx.StaticText(self.panel, label = "Provincia", style = wx.ALIGN_LEFT)   
+        box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5) 
         self.cities = wx.Choice(self.panel, choices = list(self.italy[regions[0]]))
-        box.Add(self.cities, 1, wx.EXPAND|wx.ALL, 5)
+        box.Add(self.cities, pos = (1, 1), flag = wx.EXPAND|wx.ALL, border = 5)
 
-        self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTRE) 
-        box.Add(self.result, 0, wx.EXPAND|wx.ALL, 20)
+        self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER) 
+        box.Add(self.result, pos = (2, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
         self.updateRes()
 
-        box.AddStretchSpacer() 
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.panel.SetSizer(box) 
+        self.panel.SetSizerAndFit(box) 
         self.Centre() 
         self.Show() 
 
     def onClose(self, event):
-        print('bye')
         self.Destroy()
 
     def initItaly(self):
@@ -81,7 +80,10 @@ class CowWnd(wx.Frame):
         else:
             res = allData[3]
             values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
-            res = str(values[-1]) + ' ultimi nuovi positivi in data ' + str( datetime.date.today()) + '\n'
+            today = datetime.date.today()
+            diff = str(values[-1] - values[-2]) if values[-1] - values[-2] < 0 else '+' + str(values[-1] - values[-2])
+            res =  self.days[today.weekday()] + ' ' + str(today) + '\n'
+            res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
             res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
             res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
             res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n\n'
