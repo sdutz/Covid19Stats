@@ -14,10 +14,10 @@ class CowWnd(wx.Frame):
         self.panel = wx.Panel(self) 
         box = wx.BoxSizer(wx.VERTICAL) 
 
+        regions = list(self.italy.keys())
+
         static = wx.StaticText(self.panel, label = "Regione", style = wx.ALIGN_CENTRE) 
         box.Add(static, 0, wx.EXPAND|wx.ALL, 5)
-
-        regions = list(self.italy.keys())
         self.regions = wx.Choice(self.panel, choices = regions)
         box.Add(self.regions, 1, wx.EXPAND|wx.ALL, 5) 
 
@@ -77,7 +77,7 @@ class CowWnd(wx.Frame):
         page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
-            res = 'dati non disponibili: ' + region + ' ' + city
+            res = 'dati non disponibili per: ' + region + ' ' + city
         else:
             res = allData[3]
             values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
