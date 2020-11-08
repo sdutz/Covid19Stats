@@ -1,21 +1,29 @@
 import wx
 import re
 import os
+import numpy
 import requests
 import datetime
 import statistics
 import configparser
+import matplotlib.pyplot as pyplot
+from PIL import Image
+from resizeimage import resizeimage
+
 
 class CowWnd(wx.Frame): 
     def __init__(self, parent, title): 
-        super(CowWnd, self).__init__(parent, title = title,size = (250,250), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+        super(CowWnd, self).__init__(parent, title = title,size = (250,400), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.italy = {}
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
         self.region = "Lombardia"
         self.city = "Bergamo"
-        self.iniFile = os.path.realpath(__file__) [:-3] + '.ini'
+        base = os.path.realpath(__file__) [:-3]
+        self.iniFile = base + '.ini'
+        self.pic = base + '.png'
+        self.respic = base + 'res.png'
         self.loadConfig()
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
@@ -35,10 +43,16 @@ class CowWnd(wx.Frame):
         self.cities.SetSelection(cities.index(self.city))
         box.Add(self.cities, pos = (1, 1), flag = wx.EXPAND|wx.ALL, border = 5)
 
-        self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER) 
+        self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
         box.Add(self.result, pos = (2, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
-        self.updateRes()
 
+        self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
+        box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
+
+        about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.baseUrl + '\n' + 'Made by sdutz')
+        box.Add(about, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
+
+        self.showData()
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
         self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -91,9 +105,9 @@ class CowWnd(wx.Frame):
 
     def OnRegions(self, event):
         self.cities.SetItems(self.italy[self.regions.GetString(self.regions.GetSelection())])
-        self.updateRes()
+        self.showData()
 
-    def updateRes(self):
+    def showData(self):
         region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
         city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
         
@@ -104,19 +118,28 @@ class CowWnd(wx.Frame):
         else:
             res = allData[3]
             values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+            pyplot.plot( numpy.diff(values))
+            pyplot.ylabel('')
+            pyplot.xlabel('')
+            pyplot.savefig(self.pic)
+            pyplot.close()
+            with open(self.pic, 'r+b') as f:
+                with Image.open(f) as image:
+                    cover = resizeimage.resize_cover(image, [200, 150])
+                    cover.save(self.respic, image.format)
+            self.graph.SetBitmap(wx.BitmapFromImage(self.respic))
             today = datetime.date.today()
-            diff = str(values[-1] - values[-2]) if values[-1] - values[-2] < 0 else '+' + str(values[-1] - values[-2])
+            diff = values[-1] - values[-2]
+            diff = str(diff) if diff < 0 else '+' + str(diff)
             res =  self.days[today.weekday()] + ' ' + str(today) + '\n'
             res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
             res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
             res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
-            res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n\n'
-            res += 'fonte: ' + self.baseUrl + '\n\n'
-            res += 'Made by sdutz'
+            res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
         self.result.SetLabel(res)
 
     def OnCities(self, event):
-        self.updateRes()
+        self.showData()
 
     def cleanName(self, name):
         return name.lower().replace(' ', '-').replace('\'', '-')
