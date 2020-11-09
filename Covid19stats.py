@@ -1,5 +1,6 @@
 '''Module to retrieve daily report about Corona Virus in Italy'''
 
+#----------------------------------------------------------------
 import wx
 import re
 import os
@@ -13,6 +14,7 @@ import matplotlib.pyplot as pyplot
 from PIL import Image
 from resizeimage import resizeimage
 
+#----------------------------------------------------------------
 def is_connected():
     '''Test newtwork connection'''
     try:
@@ -21,6 +23,7 @@ def is_connected():
     except OSError:
         return False
 
+#----------------------------------------------------------------
 class CowWnd(wx.Frame): 
     '''Main Window class'''
     def __init__(self, parent, title): 
@@ -33,6 +36,7 @@ class CowWnd(wx.Frame):
         self.Centre() 
         self.Show()
 
+#----------------------------------------------------------------
     def initData(self):
         '''Init of all data'''
         self.italy = {}
@@ -46,6 +50,7 @@ class CowWnd(wx.Frame):
         self.pic = base + '.png'
         self.respic = base + 'res.png'
 
+#----------------------------------------------------------------
     def initUI(self):
         '''Init of user interface'''
         self.panel = wx.Panel(self) 
@@ -77,13 +82,15 @@ class CowWnd(wx.Frame):
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.panel.SetSizerAndFit(box) 
+        self.panel.SetSizerAndFit(box)
 
+#----------------------------------------------------------------
     def onClose(self, event):
         '''on Close event'''
         self.saveConfig()
         self.Destroy()
 
+#----------------------------------------------------------------
     def initItaly(self):
         '''init of all regions and cities of Italy'''
         self.italy["Abruzzo"]=["L'Aquila","Chieti","Pescara","Teramo"]
@@ -109,6 +116,7 @@ class CowWnd(wx.Frame):
         for key in self.italy:
             self.italy[key].sort()
 
+#----------------------------------------------------------------
     def loadConfig(self):
         '''Load configuration from ini file'''
         config = configparser.ConfigParser()
@@ -117,6 +125,7 @@ class CowWnd(wx.Frame):
             self.region = config["General"]["Region"]
             self.city   = config["General"]["City"]
 
+#----------------------------------------------------------------
     def saveConfig(self):
         '''Save configuration to ini file'''
         config = configparser.ConfigParser()
@@ -126,10 +135,12 @@ class CowWnd(wx.Frame):
         with open(self.iniFile, 'w') as configFile:
             config.write(configFile)
 
+#----------------------------------------------------------------
     def OnRegions(self, event):
         self.cities.SetItems(self.italy[self.regions.GetString(self.regions.GetSelection())])
         self.showData()
 
+#----------------------------------------------------------------
     def showData(self):
         '''show all data about selected city'''
         if not is_connected():
@@ -140,9 +151,7 @@ class CowWnd(wx.Frame):
         try:
             page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
         except requests.exceptions.RequestException as e:
-            res = 'impossibile stabilire la connessione con la fonte\n'
-            res += str(e)
-            self.result.SetLabel(res)
+            self.result.SetLabel('impossibile stabilire la connessione con la fonte\n' + str(e))
             return
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
@@ -168,13 +177,17 @@ class CowWnd(wx.Frame):
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
         self.result.SetLabel(res)
+        self.panel.Fit()
 
+#----------------------------------------------------------------
     def OnCities(self, event):
         self.showData()
 
+#----------------------------------------------------------------
     def cleanName(self, name):
         return name.lower().replace(' ', '-').replace('\'', '-')
 
+#----------------------------------------------------------------
 if __name__ == "__main__":              
     app = wx.App() 
     CowWnd(None, 'Bilancio Covid') 
