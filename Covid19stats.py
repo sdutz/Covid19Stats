@@ -1,3 +1,5 @@
+'''Module to retrieve daily report about Corona Virus in Italy'''
+
 import wx
 import re
 import os
@@ -12,6 +14,7 @@ from PIL import Image
 from resizeimage import resizeimage
 
 def is_connected():
+    '''Test newtwork connection'''
     try:
         socket.create_connection(("1.1.1.1", 53))
         return True
@@ -19,7 +22,9 @@ def is_connected():
         return False
 
 class CowWnd(wx.Frame): 
+    '''Main Window class'''
     def __init__(self, parent, title): 
+        '''Constructor'''
         super(CowWnd, self).__init__(parent, title = title,size = (250,400), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initData()
         self.loadConfig()
@@ -29,6 +34,7 @@ class CowWnd(wx.Frame):
         self.Show()
 
     def initData(self):
+        '''Init of all data'''
         self.italy = {}
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
@@ -41,6 +47,7 @@ class CowWnd(wx.Frame):
         self.respic = base + 'res.png'
 
     def initUI(self):
+        '''Init of user interface'''
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
 
@@ -73,10 +80,12 @@ class CowWnd(wx.Frame):
         self.panel.SetSizerAndFit(box) 
 
     def onClose(self, event):
+        '''on Close event'''
         self.saveConfig()
         self.Destroy()
 
     def initItaly(self):
+        '''init of all regions and cities of Italy'''
         self.italy["Abruzzo"]=["L'Aquila","Chieti","Pescara","Teramo"]
         self.italy["Basilicata"]=["Potenza","Matera"]
         self.italy["Calabria"]=["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia Marina","Cosenza"]
@@ -101,6 +110,7 @@ class CowWnd(wx.Frame):
             self.italy[key].sort()
 
     def loadConfig(self):
+        '''Load configuration from ini file'''
         config = configparser.ConfigParser()
         config.read(self.iniFile)
         if 'General' in config.sections():
@@ -108,6 +118,7 @@ class CowWnd(wx.Frame):
             self.city   = config["General"]["City"]
 
     def saveConfig(self):
+        '''Save configuration to ini file'''
         config = configparser.ConfigParser()
         config["General"] = {}
         config["General"]["Region"] = self.regions.GetString( self.regions.GetSelection())
@@ -120,6 +131,7 @@ class CowWnd(wx.Frame):
         self.showData()
 
     def showData(self):
+        '''show all data about selected city'''
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
             return
