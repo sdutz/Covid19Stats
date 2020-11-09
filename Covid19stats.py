@@ -138,6 +138,7 @@ class CowWnd(wx.Frame):
 #----------------------------------------------------------------
     def OnRegions(self, event):
         self.cities.SetItems(self.italy[self.regions.GetString(self.regions.GetSelection())])
+        self.cities.SetSelection(0)
         self.showData()
 
 #----------------------------------------------------------------
