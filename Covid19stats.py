@@ -33,9 +33,9 @@ class CowWnd(wx.Frame):
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
-        self.region = "Lombardia"
-        self.city = "Bergamo"
-        base = os.path.realpath(__file__) [:-3]
+        self.region = 'Lombardia'
+        self.city = 'Bergamo'
+        base = os.path.realpath(__file__)[:-3]
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
@@ -45,13 +45,13 @@ class CowWnd(wx.Frame):
         box = wx.GridBagSizer()
 
         regions = list(self.italy.keys())
-        static = wx.StaticText(self.panel, label = "Regione", style = wx.LEFT) 
+        static = wx.StaticText(self.panel, label = 'Regione', style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         self.regions = wx.Choice(self.panel, choices = regions)
         self.regions.SetSelection(regions.index(self.region))
         box.Add(self.regions, pos = (0, 1), flag = wx.EXPAND|wx.ALL, border = 5) 
 
-        static = wx.StaticText(self.panel, label = "Provincia", style = wx.ALIGN_LEFT)   
+        static = wx.StaticText(self.panel, label = 'Provincia', style = wx.ALIGN_LEFT)   
         box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         cities = list(self.italy[self.region])
         self.cities = wx.Choice(self.panel, choices = cities)
@@ -64,7 +64,7 @@ class CowWnd(wx.Frame):
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
 
-        about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.baseUrl + '\n' + 'Made by sdutz')
+        about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.baseUrl + '\n\n' + 'Made by sdutz')
         box.Add(about, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
 
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
@@ -103,7 +103,7 @@ class CowWnd(wx.Frame):
     def loadConfig(self):
         config = configparser.ConfigParser()
         config.read(self.iniFile)
-        if "General" in config.sections():
+        if 'General' in config.sections():
             self.region = config["General"]["Region"]
             self.city   = config["General"]["City"]
 
@@ -120,11 +120,11 @@ class CowWnd(wx.Frame):
         self.showData()
 
     def showData(self):
-        region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
-        city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
             return
+        region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
+        city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
         try:
             page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
         except requests.exceptions.RequestException as e:
@@ -138,7 +138,7 @@ class CowWnd(wx.Frame):
             return
         res = allData[3]
         values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
-        pyplot.plot( numpy.diff(values))
+        pyplot.plot(numpy.diff(values))
         pyplot.ylabel('')
         pyplot.xlabel('')
         pyplot.savefig(self.pic)
@@ -165,5 +165,5 @@ class CowWnd(wx.Frame):
 
 if __name__ == "__main__":              
     app = wx.App() 
-    CowWnd(None, 'Covid19 Report') 
+    CowWnd(None, 'Bilancio Covid') 
     app.MainLoop()
