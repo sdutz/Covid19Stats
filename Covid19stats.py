@@ -2,6 +2,7 @@ import wx
 import re
 import os
 import numpy
+import socket
 import requests
 import datetime
 import statistics
@@ -10,10 +11,24 @@ import matplotlib.pyplot as pyplot
 from PIL import Image
 from resizeimage import resizeimage
 
+def is_connected():
+    try:
+        socket.create_connection(("1.1.1.1", 53))
+        return True
+    except OSError:
+        return False
 
 class CowWnd(wx.Frame): 
     def __init__(self, parent, title): 
         super(CowWnd, self).__init__(parent, title = title,size = (250,400), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+        self.initData()
+        self.loadConfig()
+        self.initUI()
+        self.showData()
+        self.Centre() 
+        self.Show()
+
+    def initData(self):
         self.italy = {}
         self.initItaly()
         self.baseUrl = 'https://statistichecoronavirus.it'
@@ -24,12 +39,12 @@ class CowWnd(wx.Frame):
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
-        self.loadConfig()
+
+    def initUI(self):
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
 
         regions = list(self.italy.keys())
-
         static = wx.StaticText(self.panel, label = "Regione", style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         self.regions = wx.Choice(self.panel, choices = regions)
@@ -52,13 +67,10 @@ class CowWnd(wx.Frame):
         about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.baseUrl + '\n' + 'Made by sdutz')
         box.Add(about, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
 
-        self.showData()
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.panel.SetSizerAndFit(box) 
-        self.Centre() 
-        self.Show() 
 
     def onClose(self, event):
         self.saveConfig()
@@ -100,7 +112,7 @@ class CowWnd(wx.Frame):
         config["General"] = {}
         config["General"]["Region"] = self.regions.GetString( self.regions.GetSelection())
         config["General"]["City"] = self.cities.GetString( self.cities.GetSelection())
-        with open( self.iniFile, 'w') as configFile:
+        with open(self.iniFile, 'w') as configFile:
             config.write(configFile)
 
     def OnRegions(self, event):
@@ -110,32 +122,39 @@ class CowWnd(wx.Frame):
     def showData(self):
         region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
         city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
-        
-        page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
+        if not is_connected():
+            self.result.SetLabel('nessuna connessione di rete presente')
+            return
+        try:
+            page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
+        except requests.exceptions.RequestException as e:
+            res = 'impossibile stabilire la connessione con la fonte\n'
+            res += str(e)
+            self.result.SetLabel(res)
+            return
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
-            res = 'dati non disponibili per: ' + region + ' ' + city
-        else:
-            res = allData[3]
-            values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
-            pyplot.plot( numpy.diff(values))
-            pyplot.ylabel('')
-            pyplot.xlabel('')
-            pyplot.savefig(self.pic)
-            pyplot.close()
-            with open(self.pic, 'r+b') as f:
-                with Image.open(f) as image:
-                    cover = resizeimage.resize_cover(image, [200, 150])
-                    cover.save(self.respic, image.format)
-            self.graph.SetBitmap(wx.BitmapFromImage(self.respic))
-            today = datetime.date.today()
-            diff = values[-1] - values[-2]
-            diff = str(diff) if diff < 0 else '+' + str(diff)
-            res =  self.days[today.weekday()] + ' ' + str(today) + '\n'
-            res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
-            res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
-            res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
-            res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
+            self.result.SetLabel('dati non disponibili per: ' + region + ' ' + city)
+            return
+        res = allData[3]
+        values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+        pyplot.plot( numpy.diff(values))
+        pyplot.ylabel('')
+        pyplot.xlabel('')
+        pyplot.savefig(self.pic)
+        pyplot.close()
+        with open(self.pic, 'r+b') as file, Image.open(file) as image:
+            cover = resizeimage.resize_cover(image, [200, 150])
+            cover.save(self.respic, image.format)
+        self.graph.SetBitmap(wx.Bitmap(self.respic))
+        today = datetime.date.today()
+        diff = values[-1] - values[-2]
+        diff = str(diff) if diff < 0 else '+' + str(diff)
+        res =  self.days[today.weekday()] + ' ' + str(today) + '\n'
+        res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
+        res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
+        res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
+        res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
         self.result.SetLabel(res)
 
     def OnCities(self, event):
