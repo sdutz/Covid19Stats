@@ -89,7 +89,8 @@ class CowWnd(wx.Frame):
     def onClose(self, event):
         '''on Close event'''
         self.saveConfig()
-        self.timer.cancel()
+        if self.timer:
+            self.timer.cancel()
         self.Destroy()
 
 #----------------------------------------------------------------
