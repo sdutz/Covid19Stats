@@ -59,7 +59,6 @@ class CowWnd(wx.Frame):
         '''Init of user interface'''
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
-
         regions = list(self.italy.keys())
         static = wx.StaticText(self.panel, label = 'Regione', style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
@@ -76,10 +75,8 @@ class CowWnd(wx.Frame):
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
         box.Add(self.result, pos = (2, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
-
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
-
         about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.baseUrl + '\n\n' + 'Made by sdutz')
         box.Add(about, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
 
@@ -170,13 +167,12 @@ class CowWnd(wx.Frame):
         pyplot.savefig(self.pic)
         pyplot.close()
         with open(self.pic, 'r+b') as file, Image.open(file) as image:
-            cover = resizeimage.resize_cover(image, [self.size[0] - 50, 150])
-            cover.save(self.respic, image.format)
+            resizeimage.resize_cover(image, [self.size[0] - 50, 150]).save(self.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.respic))
         today = datetime.date.today()
+        res =  self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         diff = values[-1] - values[-2]
         diff = str(diff) if diff < 0 else '+' + str(diff)
-        res =  self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
         res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
