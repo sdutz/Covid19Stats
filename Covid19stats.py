@@ -13,6 +13,7 @@ import statistics
 import configparser
 import matplotlib.pyplot as pyplot
 from PIL import Image
+from threading import Timer
 from resizeimage import resizeimage
 
 #----------------------------------------------------------------
@@ -34,6 +35,7 @@ class CowWnd(wx.Frame):
         self.initData()
         self.loadConfig()
         self.initUI()
+        self.timer = Timer(21600, self.showData)
         self.showData()
         self.Centre() 
         self.Show()
@@ -90,6 +92,7 @@ class CowWnd(wx.Frame):
     def onClose(self, event):
         '''on Close event'''
         self.saveConfig()
+        self.timer.cancel()
         self.Destroy()
 
 #----------------------------------------------------------------
@@ -182,6 +185,7 @@ class CowWnd(wx.Frame):
         self.result.SetLabel(res)
         self.panel.SetSize(self.size)
         self.panel.Fit()
+        self.timer.start()
 
 #----------------------------------------------------------------
     def OnCities(self, event):
