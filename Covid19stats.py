@@ -35,7 +35,7 @@ class CowWnd(wx.Frame):
         self.initData()
         self.loadConfig()
         self.initUI()
-        self.timer = Timer(21600, self.showData)
+        self.timer = None
         self.showData()
         self.Centre() 
         self.Show()
@@ -181,6 +181,9 @@ class CowWnd(wx.Frame):
         self.result.SetLabel(res)
         self.panel.SetSize(self.size)
         self.panel.Fit()
+        if self.timer:
+            self.timer.cancel()
+        self.timer = Timer(21600, self.showData)
         self.timer.start()
 
 #----------------------------------------------------------------
