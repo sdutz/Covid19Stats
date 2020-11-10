@@ -28,7 +28,8 @@ class CowWnd(wx.Frame):
     '''Main Window class'''
     def __init__(self, parent, title): 
         '''Constructor'''
-        super(CowWnd, self).__init__(parent, title = title,size = (250,400), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+        self.size = (250,400)
+        super(CowWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initData()
         self.loadConfig()
         self.initUI()
@@ -178,6 +179,7 @@ class CowWnd(wx.Frame):
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
         self.result.SetLabel(res)
+        self.panel.SetSize(self.size)
         self.panel.Fit()
 
 #----------------------------------------------------------------
