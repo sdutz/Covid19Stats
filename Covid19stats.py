@@ -95,28 +95,26 @@ class CowWnd(wx.Frame):
 #----------------------------------------------------------------
     def initItaly(self):
         '''init of all regions and cities of Italy'''
-        self.italy["Abruzzo"]=["L'Aquila","Chieti","Pescara","Teramo"]
-        self.italy["Basilicata"]=["Potenza","Matera"]
-        self.italy["Calabria"]=["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia Marina","Cosenza"]
-        self.italy["Campania"]=["Napoli","Avellino","Caserta","Benevento","Salerno"]
-        self.italy["Emilia Romagna"]=["Bologna","Reggio Emilia","Parma","Modena","Ferrara","Forlì Cesena","Piacenza","Ravenna","Rimini"]
-        self.italy["Friuli Venezia Giulia"]=["Trieste","Gorizia","Pordenone","Udine"]
-        self.italy["Lazio"]=["Roma","Latina","Frosinone","Viterbo","Rieti"]
-        self.italy["Liguria"]=["Genova","Imperia","La Spezia","Savona"]
-        self.italy["Lombardia"]=["Milano","Bergamo","Brescia","Como","Cremona","Mantova","Monza Brianza","Pavia","Sondrio","Lodi","Lecco","Varese"]
-        self.italy["Marche"]=["Ancona","Ascoli Piceno","Fermo","Macerata","Pesaro Urbino"]
-        self.italy["Molise"]=["Campobasso","Isernia"]
-        self.italy["Piemonte"]=["Torino","Asti","Alessandria","Cuneo","Novara","Vercelli","Verbania","Biella"]
+        self.italy["Abruzzo"]=sorted(["L'Aquila","Chieti","Pescara","Teramo"])
+        self.italy["Basilicata"]=sorted(["Potenza","Matera"])
+        self.italy["Calabria"]=sorted(["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia Marina","Cosenza"])
+        self.italy["Campania"]=sorted(["Napoli","Avellino","Caserta","Benevento","Salerno"])
+        self.italy["Emilia Romagna"]=sorted(["Bologna","Reggio Emilia","Parma","Modena","Ferrara","Forlì Cesena","Piacenza","Ravenna","Rimini"])
+        self.italy["Friuli Venezia Giulia"]=sorted(["Trieste","Gorizia","Pordenone","Udine"])
+        self.italy["Lazio"]=sorted(["Roma","Latina","Frosinone","Viterbo","Rieti"])
+        self.italy["Liguria"]=sorted(["Genova","Imperia","La Spezia","Savona"])
+        self.italy["Lombardia"]=sorted(["Milano","Bergamo","Brescia","Como","Cremona","Mantova","Monza Brianza","Pavia","Sondrio","Lodi","Lecco","Varese"])
+        self.italy["Marche"]=sorted(["Ancona","Ascoli Piceno","Fermo","Macerata","Pesaro Urbino"])
+        self.italy["Molise"]=sorted(["Campobasso","Isernia"])
+        self.italy["Piemonte"]=sorted(["Torino","Asti","Alessandria","Cuneo","Novara","Vercelli","Verbania","Biella"])
         self.italy["Valle d'Aosta"]=["Aosta"]
-        self.italy["Puglia"]=["Bari","Barletta-Andria-Trani","Brindisi","Foggia","Lecce","Taranto"]
-        self.italy["Sardegna"]=["Cagliari","Sassari","Nuoro","Oristano","Carbonia Iglesias","Medio Campidano","Olbia Tempio","Ogliastra"]
-        self.italy["Sicilia"]=["Palermo","Agrigento","Caltanissetta","Catania","Enna","Messina","Ragusa","Siracusa","Trapani"]
-        self.italy["Toscana"]=["Arezzo","Massa Carrara","Firenze","Livorno","Grosseto","Lucca","Pisa","Pistoia","Prato","Siena"]
-        self.italy["Trentino Alto Adige"]=["Trento","Bolzano"]
-        self.italy["Umbria"]=["Perugia","Terni"]
-        self.italy["Veneto"]=["Venezia","Belluno","Padova","Rovigo","Treviso","Verona","Vicenza"]
-        for key in self.italy:
-            self.italy[key].sort()
+        self.italy["Puglia"]=sorted(["Bari","Barletta-Andria-Trani","Brindisi","Foggia","Lecce","Taranto"])
+        self.italy["Sardegna"]=sorted(["Cagliari","Sassari","Nuoro","Oristano","Carbonia Iglesias","Medio Campidano","Olbia Tempio","Ogliastra"])
+        self.italy["Sicilia"]=sorted(["Palermo","Agrigento","Caltanissetta","Catania","Enna","Messina","Ragusa","Siracusa","Trapani"])
+        self.italy["Toscana"]=sorted(["Arezzo","Massa Carrara","Firenze","Livorno","Grosseto","Lucca","Pisa","Pistoia","Prato","Siena"])
+        self.italy["Trentino Alto Adige"]=sorted(["Trento","Bolzano"])
+        self.italy["Umbria"]=sorted(["Perugia","Terni"])
+        self.italy["Veneto"]=sorted(["Venezia","Belluno","Padova","Rovigo","Treviso","Verona","Vicenza"])
 
 #----------------------------------------------------------------
     def loadConfig(self):
