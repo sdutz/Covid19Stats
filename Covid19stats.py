@@ -148,6 +148,7 @@ class CowWnd(wx.Frame):
         start = time.process_time()
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
+            self.startTimer(60)
             return
         region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
         city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
@@ -155,10 +156,12 @@ class CowWnd(wx.Frame):
             page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
         except requests.exceptions.RequestException as e:
             self.result.SetLabel('impossibile stabilire la connessione con la fonte\n' + str(e))
+            self.startTimer(60)
             return
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
             self.result.SetLabel('dati non disponibili per: ' + region + ' ' + city)
+            self.startTimer(60)
             return
         res = allData[3]
         values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
@@ -182,9 +185,13 @@ class CowWnd(wx.Frame):
         self.result.SetLabel(res)
         self.panel.SetSize(self.size)
         self.panel.Fit()
+        self.startTimer(21600)
+
+#----------------------------------------------------------------
+    def startTimer(self, sec):    
         if self.timer:
             self.timer.cancel()
-        self.timer = Timer(21600, self.showData)
+        self.timer = Timer(sec, self.showData)
         self.timer.start()
 
 #----------------------------------------------------------------
