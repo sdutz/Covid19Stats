@@ -4,6 +4,7 @@
 import wx
 import re
 import os
+import time
 import numpy
 import socket
 import requests
@@ -28,7 +29,7 @@ class CowWnd(wx.Frame):
     '''Main Window class'''
     def __init__(self, parent, title): 
         '''Constructor'''
-        self.size = (250,400)
+        self.size = (250, 400)
         super(CowWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initData()
         self.loadConfig()
@@ -145,6 +146,7 @@ class CowWnd(wx.Frame):
 #----------------------------------------------------------------
     def showData(self):
         '''show all data about selected city'''
+        start = time.process_time()
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
             return
@@ -167,7 +169,7 @@ class CowWnd(wx.Frame):
         pyplot.savefig(self.pic)
         pyplot.close()
         with open(self.pic, 'r+b') as file, Image.open(file) as image:
-            cover = resizeimage.resize_cover(image, [200, 150])
+            cover = resizeimage.resize_cover(image, [self.size[0] - 50, 150])
             cover.save(self.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.respic))
         today = datetime.date.today()
@@ -178,6 +180,7 @@ class CowWnd(wx.Frame):
         res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
+        print('retrieved in ' + str(time.process_time() - start) + ' s')
         self.result.SetLabel(res)
         self.panel.SetSize(self.size)
         self.panel.Fit()
