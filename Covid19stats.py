@@ -173,9 +173,9 @@ class CowWnd(wx.Frame):
         today = datetime.date.today()
         diff = values[-1] - values[-2]
         diff = str(diff) if diff < 0 else '+' + str(diff)
-        res =  self.days[today.weekday()] + ' ' + str(today) + '\n'
+        res =  self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
-        res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni' + '\n'
+        res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
         print('retrieved in ' + str(time.process_time() - start) + ' s')
