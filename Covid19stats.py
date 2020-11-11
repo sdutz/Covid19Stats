@@ -20,7 +20,7 @@ from resizeimage import resizeimage
 def is_connected():
     '''Test newtwork connection'''
     try:
-        socket.create_connection(("1.1.1.1", 53))
+        socket.create_connection(('1.1.1.1', 53))
         return True
     except OSError:
         return False
@@ -30,12 +30,13 @@ class CowWnd(wx.Frame):
     '''Main Window class'''
     def __init__(self, parent, title): 
         '''Constructor'''
-        self.size = (250, 400)
+        self.size = (250, 420)
         super(CowWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initData()
         self.loadConfig()
         self.initUI()
         self.timer = None
+        self.last = None
         self.showData()
         self.Centre() 
         self.Show()
@@ -83,6 +84,7 @@ class CowWnd(wx.Frame):
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        self.panel.Bind(wx.EVT_CHAR, self.onKeyDown)
         self.panel.SetSizerAndFit(box)
 
 #----------------------------------------------------------------
@@ -92,6 +94,32 @@ class CowWnd(wx.Frame):
         if self.timer:
             self.timer.cancel()
         self.Destroy()
+            
+#----------------------------------------------------------------
+    def onKeyDown(self, event):
+        if event.GetKeyCode() == ord('f'):
+            self.onSearch()
+
+#----------------------------------------------------------------
+    def onSearch(self):
+        dlg = wx.TextEntryDialog(self, 'Cerca la città')
+        if ( dlg.ShowModal() == wx.ID_OK):
+            self.doSearch(dlg.GetValue())
+        dlg.Destroy()
+
+#----------------------------------------------------------------
+    def doSearch(self, city):
+        idx = 0
+        for region in self.italy:
+            if city in self.italy[region]:
+                self.region = region
+                self.city = city
+                self.regions.SetSelection(idx)
+                self.cities.SetItems(self.italy[region])
+                self.cities.SetSelection(self.italy[region].index(city))
+                self.showData()
+                break
+            idx += 1
 
 #----------------------------------------------------------------
     def initItaly(self):
@@ -143,12 +171,10 @@ class CowWnd(wx.Frame):
         self.showData()
 
 #----------------------------------------------------------------
-    def showData(self):
-        '''show all data about selected city'''
-        start = time.process_time()
+    def getValues(self):
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
-            self.startTimer(60)
+            self.startTimer(False)
             return
         region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
         city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
@@ -156,15 +182,18 @@ class CowWnd(wx.Frame):
             page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
         except requests.exceptions.RequestException as e:
             self.result.SetLabel('impossibile stabilire la connessione con la fonte\n' + str(e))
-            self.startTimer(60)
+            self.startTimer(False)
             return
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
             self.result.SetLabel('dati non disponibili per: ' + region + ' ' + city)
-            self.startTimer(60)
+            self.startTimer(False)
             return
         res = allData[3]
-        values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+        return [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+
+#----------------------------------------------------------------
+    def setGraph(self, values):
         pyplot.plot(numpy.diff(values))
         pyplot.ylabel('')
         pyplot.xlabel('')
@@ -173,26 +202,46 @@ class CowWnd(wx.Frame):
         with open(self.pic, 'r+b') as file, Image.open(file) as image:
             resizeimage.resize_cover(image, [self.size[0] - 50, 150]).save(self.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.respic))
+
+#----------------------------------------------------------------
+    def setStats(self, values):
         today = datetime.date.today()
-        res =  self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
+        res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         diff = values[-1] - values[-2]
         diff = str(diff) if diff < 0 else '+' + str(diff)
         res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
         res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
+        res += 'totale nuovi positivi: ' + str(numpy.sum(values)) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
-        print('retrieved in ' + str(time.process_time() - start) + ' s')
         self.result.SetLabel(res)
-        self.panel.SetSize(self.size)
-        self.panel.Fit()
-        self.startTimer(21600)
 
 #----------------------------------------------------------------
-    def startTimer(self, sec):    
+    def showData(self):
+        '''show all data about selected city'''
+        start = time.process_time()
+        values = self.getValues()
+        if not values:
+            return
+        self.setGraph(values)
+        self.setStats(values)
+        self.last = time.process_time()
+        print('retrieved in ' + str(self.last - start) + ' s')
+        self.panel.SetSize(self.size)
+        self.panel.Fit()
+        self.startTimer(True)
+
+#----------------------------------------------------------------
+    def startTimer(self, read):
         if self.timer:
             self.timer.cancel()
-        self.timer = Timer(sec, self.showData)
+        self.timer = Timer(60, self.showData) if not read else Timer(30, self.checkTime)
         self.timer.start()
+
+#----------------------------------------------------------------
+    def checkTime(self):
+        if time.process_time() - self.last > 21600:
+            self.showData()
 
 #----------------------------------------------------------------
     def OnCities(self, event):
