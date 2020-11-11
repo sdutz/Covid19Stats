@@ -97,11 +97,13 @@ class CowWnd(wx.Frame):
             
 #----------------------------------------------------------------
     def onKeyDown(self, event):
+        '''on key down event'''
         if event.GetKeyCode() == ord('f'):
             self.onSearch()
 
 #----------------------------------------------------------------
     def onSearch(self):
+        '''search dialogs'''
         dlg = wx.TextEntryDialog(self, 'Cerca la città')
         if ( dlg.ShowModal() == wx.ID_OK):
             if not self.doSearch(dlg.GetValue()):
@@ -110,6 +112,7 @@ class CowWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def doSearch(self, city):
+        '''perform serch of a city'''
         idx = 0
         for region in self.italy:
             if city in self.italy[region]:
@@ -174,6 +177,7 @@ class CowWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def getValues(self):
+        '''retrieve values from website'''
         if not is_connected():
             self.result.SetLabel('nessuna connessione di rete presente')
             self.startTimer(False)
@@ -196,6 +200,7 @@ class CowWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def setGraph(self, values):
+        '''plot graph'''
         pyplot.plot(numpy.diff(values))
         pyplot.ylabel('')
         pyplot.xlabel('')
@@ -207,6 +212,7 @@ class CowWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def setStats(self, values):
+        '''performs stats'''
         today = datetime.date.today()
         res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         diff = values[-1] - values[-2]
