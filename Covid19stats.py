@@ -104,7 +104,8 @@ class CowWnd(wx.Frame):
     def onSearch(self):
         dlg = wx.TextEntryDialog(self, 'Cerca la città')
         if ( dlg.ShowModal() == wx.ID_OK):
-            self.doSearch(dlg.GetValue())
+            if not self.doSearch(dlg.GetValue()):
+                wx.MessageBox('Nessun risultato trovato', parent=self)
         dlg.Destroy()
 
 #----------------------------------------------------------------
@@ -118,8 +119,9 @@ class CowWnd(wx.Frame):
                 self.cities.SetItems(self.italy[region])
                 self.cities.SetSelection(self.italy[region].index(city))
                 self.showData()
-                break
+                return True
             idx += 1
+        return False
 
 #----------------------------------------------------------------
     def initItaly(self):
