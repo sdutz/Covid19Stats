@@ -28,14 +28,13 @@ def is_connected():
 #----------------------------------------------------------------
 class CovStats(): 
     '''Stats class'''
-    def __init__(self, size):
+    def __init__(self):
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
         base = os.path.realpath(__file__)[:-3]
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
-        self.size = size
         
 #----------------------------------------------------------------
     def getStats(self, region, city):
@@ -62,8 +61,6 @@ class CovStats():
         pyplot.xlabel('')
         pyplot.savefig(self.pic)
         pyplot.close()
-        with open(self.pic, 'r+b') as file, Image.open(file) as image:
-            resizeimage.resize_cover(image, self.size).save(self.respic, image.format)
 
 #----------------------------------------------------------------
     def calcStats(self, values):
@@ -110,7 +107,7 @@ class CovWnd(wx.Frame):
         self.size = (250, 420)
         super(CovWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initItaly()
-        self.stats = CovStats((self.size[0] - 50, 150))
+        self.stats = CovStats()
         region, city = self.stats.loadConfig()
         self.initUI(region, city)
         self.timer = None
@@ -182,8 +179,6 @@ class CovWnd(wx.Frame):
         idx = 0
         for region in self.italy:
             if city in self.italy[region]:
-                self.region = region
-                self.city = city
                 self.regions.SetSelection(idx)
                 self.cities.SetItems(self.italy[region])
                 self.cities.SetSelection(self.italy[region].index(city))
@@ -234,6 +229,9 @@ class CovWnd(wx.Frame):
         if not ok:
             self.startTimer(False)
             return
+        with open(self.stats.pic, 'r+b') as file, Image.open(file) as image:
+            resized = resizeimage.resize_cover(image, (self.size[0] - 50, 150))
+            resized.save(self.stats.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.stats.respic))
         self.last = time.process_time()
         print('retrieved in ' + str(self.last - start) + ' s')
