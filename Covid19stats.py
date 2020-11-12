@@ -48,7 +48,7 @@ class CovStats():
         if not is_connected():
             return False, 'nessuna connessione di rete presente'
         try:
-            page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + region + '/coronavirus-' + city +'/')
+            page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + cleanName(region) + '/coronavirus-' + cleanName(city) +'/')
         except requests.exceptions.RequestException as e:
             return False, 'impossibile stabilire la connessione con la fonte\n' + str(e)
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
@@ -116,8 +116,7 @@ class CovWnd(wx.Frame):
         self.stats = CovStats()
         region, city = self.stats.loadConfig()
         self.initUI(region, city)
-        self.timer = None
-        self.last = None
+        self.timer, self.last = None, None
         self.showData()
         self.Centre() 
         self.Show()
@@ -157,8 +156,8 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def onClose(self, event):
         '''on Close event'''
-        region = self.regions.GetString( self.regions.GetSelection())
-        city = self.cities.GetString( self.cities.GetSelection())
+        region = self.regions.GetString(self.regions.GetSelection())
+        city = self.cities.GetString(self.cities.GetSelection())
         self.stats.saveConfig(region, city)
         if self.timer:
             self.timer.cancel()
@@ -167,8 +166,13 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def onKeyDown(self, event):
         '''on key down event'''
-        if event.GetKeyCode() == ord('f'):
+        code = event.GetKeyCode()
+        if code == ord('f'):
             self.onSearch()
+        elif code == ord('q'):
+            self.Close()
+        elif code == ord('r'):
+            self.showData()
 
 #----------------------------------------------------------------
     def onSearch(self):
@@ -228,8 +232,8 @@ class CovWnd(wx.Frame):
     def showData(self):
         '''show all data about selected city'''
         start = time.process_time()
-        region = cleanName(self.regions.GetString(self.regions.GetSelection()))
-        city = cleanName(self.cities.GetString(self.cities.GetSelection()))
+        region = self.regions.GetString(self.regions.GetSelection())
+        city = self.cities.GetString(self.cities.GetSelection())
         ok, stat = self.stats.getStats(region, city)
         self.result.SetLabel(stat)
         if not ok:
