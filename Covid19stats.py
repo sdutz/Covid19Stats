@@ -38,7 +38,7 @@ class CovStats():
         self.size = size
         
 #----------------------------------------------------------------
-    def getValues(self, region, city):
+    def getStats(self, region, city):
         '''retrieve values from website'''
         if not is_connected():
             return False, 'nessuna connessione di rete presente'
@@ -51,11 +51,11 @@ class CovStats():
             return False, 'dati non disponibili per: '+ region + ' ' + city
         res = allData[3]
         values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
-        self.getGraph(values)
-        return True, self.getStats(values)
+        self.calcGraph(values)
+        return True, self.calcStats(values)
 
 #----------------------------------------------------------------
-    def getGraph(self, values):
+    def calcGraph(self, values):
         '''plot graph'''
         pyplot.plot(numpy.diff(values))
         pyplot.ylabel('')
@@ -66,7 +66,7 @@ class CovStats():
             resizeimage.resize_cover(image, self.size).save(self.respic, image.format)
 
 #----------------------------------------------------------------
-    def getStats(self, values):
+    def calcStats(self, values):
         '''performs stats'''
         today = datetime.date.today()
         res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
@@ -229,7 +229,7 @@ class CovWnd(wx.Frame):
         start = time.process_time()
         region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
         city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
-        ok, stat = self.stats.getValues(region, city)
+        ok, stat = self.stats.getStats(region, city)
         self.result.SetLabel(stat)
         if not ok:
             self.startTimer(False)
