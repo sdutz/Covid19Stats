@@ -78,8 +78,8 @@ class CovStats():
         res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
         res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
-        res += 'totale nuovi positivi: ' + str(numpy.sum(values)) + '\n'
-        res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values))
+        res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n'
+        res += 'totale nuovi positivi: ' + str(numpy.sum(values))
         return res
 
 #----------------------------------------------------------------
@@ -88,10 +88,8 @@ class CovStats():
         config = configparser.ConfigParser()
         config.read(self.iniFile)
         if 'General' in config.sections():
-            region = config["General"]["Region"]
-            city = config["General"]["City"]
             pos = (int(config["General"]["PosX"]), int(config["General"]["PosY"]))
-            return region, city, pos
+            return config["General"]["Region"], config["General"]["City"], pos
         else:
             return 'Lombardia', 'Bergamo', None
 
