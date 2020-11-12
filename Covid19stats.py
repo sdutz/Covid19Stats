@@ -26,6 +26,11 @@ def is_connected():
         return False
 
 #----------------------------------------------------------------
+def cleanName(name):
+    return name.lower().replace(' ', '-').replace('\'', '-')
+
+
+#----------------------------------------------------------------
 class CovStats(): 
     '''Stats class'''
     def __init__(self):
@@ -222,8 +227,8 @@ class CovWnd(wx.Frame):
     def showData(self):
         '''show all data about selected city'''
         start = time.process_time()
-        region = self.cleanName(self.regions.GetString(self.regions.GetSelection()))
-        city = self.cleanName(self.cities.GetString(self.cities.GetSelection()))
+        region = cleanName(self.regions.GetString(self.regions.GetSelection()))
+        city = cleanName(self.cities.GetString(self.cities.GetSelection()))
         ok, stat = self.stats.getStats(region, city)
         self.result.SetLabel(stat)
         if not ok:
@@ -254,10 +259,6 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def OnCities(self, event):
         self.showData()
-
-#----------------------------------------------------------------
-    def cleanName(self, name):
-        return name.lower().replace(' ', '-').replace('\'', '-')
 
 #----------------------------------------------------------------
 if __name__ == "__main__":              
