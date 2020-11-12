@@ -90,17 +90,20 @@ class CovStats():
         if 'General' in config.sections():
             region = config["General"]["Region"]
             city = config["General"]["City"]
-            return region, city
+            pos = (int(config["General"]["PosX"]), int(config["General"]["PosY"]))
+            return region, city, pos
         else:
-            return 'Lombardia', 'Bergamo'
+            return 'Lombardia', 'Bergamo', None
 
 #----------------------------------------------------------------
-    def saveConfig(self, region, city):
+    def saveConfig(self, region, city, pos):
         '''Save configuration to ini file'''
         config = configparser.ConfigParser()
         config["General"] = {}
         config["General"]["Region"] = region
         config["General"]["City"] = city
+        config["General"]["PosX"] = str(pos[0])
+        config["General"]["PosY"] = str(pos[1])
         with open(self.iniFile, 'w') as configFile:
             config.write(configFile)
 
@@ -114,11 +117,13 @@ class CovWnd(wx.Frame):
         super(CovWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initItaly()
         self.stats = CovStats()
-        region, city = self.stats.loadConfig()
+        region, city, pos = self.stats.loadConfig()
         self.initUI(region, city)
         self.timer, self.last = None, None
         self.showData()
         self.Centre() 
+        if pos:
+            self.SetPosition(pos)
         self.Show()
 
 #----------------------------------------------------------------
@@ -158,7 +163,7 @@ class CovWnd(wx.Frame):
         '''on Close event'''
         region = self.regions.GetString(self.regions.GetSelection())
         city = self.cities.GetString(self.cities.GetSelection())
-        self.stats.saveConfig(region, city)
+        self.stats.saveConfig(region, city, self.Position)
         if self.timer:
             self.timer.cancel()
         self.Destroy()
@@ -267,6 +272,6 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
 if __name__ == "__main__":              
-    app = wx.App() 
-    CovWnd(None, 'Bilancio Covid') 
+    app = wx.App()
+    CovWnd(None, 'Bilancio Covid  1.5') 
     app.MainLoop()
