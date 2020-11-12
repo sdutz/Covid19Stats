@@ -34,6 +34,7 @@ def cleanName(name):
 class CovStats(): 
     '''Stats class'''
     def __init__(self):
+        '''Constructor'''
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
         base = os.path.realpath(__file__)[:-3]
@@ -88,7 +89,7 @@ class CovStats():
         config.read(self.iniFile)
         if 'General' in config.sections():
             region = config["General"]["Region"]
-            city   = config["General"]["City"]
+            city = config["General"]["City"]
             return region, city
         else:
             return 'Lombardia', 'Bergamo'
@@ -102,7 +103,7 @@ class CovStats():
         config["General"]["City"] = city
         with open(self.iniFile, 'w') as configFile:
             config.write(configFile)
-    
+
 
 #----------------------------------------------------------------
 class CovWnd(wx.Frame): 
