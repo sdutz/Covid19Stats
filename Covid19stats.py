@@ -246,8 +246,8 @@ class CovWnd(wx.Frame):
             resized = resizeimage.resize_cover(image, (self.size[0] - 50, 150))
             resized.save(self.stats.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.stats.respic))
-        self.last = time.process_time()
-        print('retrieved in ' + str(self.last - start) + ' s')
+        print('retrieved in ' + str(time.process_time() - start) + ' s')
+        self.last = time.time()
         self.panel.SetSize(self.size)
         self.panel.Fit()
         self.startTimer(True)
@@ -261,8 +261,10 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def checkTime(self):
-        if time.process_time() - self.last > 21600:
+        if time.time() - self.last > 21600:
             self.showData()
+        else:
+            self.startTimer(True)
 
 #----------------------------------------------------------------
     def OnCities(self, event):
