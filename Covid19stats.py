@@ -17,6 +17,8 @@ from PIL import Image
 from threading import Timer
 from resizeimage import resizeimage
 
+ver = '1.8'
+
 #----------------------------------------------------------------
 def is_connected():
     '''Test newtwork connection'''
@@ -149,6 +151,7 @@ class CovWnd(wx.Frame):
         self.result.SetToolTip('premi r per aggiornare le statistiche')
         box.Add(self.result, pos = (2, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
+        self.graph.SetToolTip('premi r per aggiornare le statistiche')
         box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
         lnk = hl.HyperLinkCtrl(parent = self.panel, label = 'fonte: ' + self.stats.baseUrl, URL = self.stats.baseUrl)
         box.Add(lnk, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
@@ -279,5 +282,5 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
 if __name__ == "__main__":              
     app = wx.App()
-    CovWnd(None, 'Bilancio Covid  1.5') 
+    CovWnd(None, 'Bilancio Covid ' + ver) 
     app.MainLoop()
