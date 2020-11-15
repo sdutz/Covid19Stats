@@ -12,6 +12,7 @@ import datetime
 import statistics
 import configparser
 import matplotlib.pyplot as pyplot
+import wx.lib.agw.hyperlink as hl
 from PIL import Image
 from threading import Timer
 from resizeimage import resizeimage
@@ -140,15 +141,20 @@ class CovWnd(wx.Frame):
         box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         cities = list(self.italy[region])
         self.cities = wx.Choice(self.panel, choices = cities)
+        self.cities.SetToolTip('premi f per cercare una provincia')
         self.cities.SetSelection(cities.index(city))
         box.Add(self.cities, pos = (1, 1), flag = wx.EXPAND|wx.ALL, border = 5)
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
+        self.result.SetToolTip('premi r per aggiornare le statistiche')
         box.Add(self.result, pos = (2, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
-        about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'fonte: ' + self.stats.baseUrl + '\n\n' + 'Made by sdutz')
-        box.Add(about, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
+        lnk = hl.HyperLinkCtrl(parent = self.panel, label = 'fonte: ' + self.stats.baseUrl, URL = self.stats.baseUrl)
+        box.Add(lnk, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
+        about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'Made by sdutz')
+        about.SetToolTip('premi q per uscire')
+        box.Add(about, pos = (6, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
 
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
