@@ -11,8 +11,8 @@ import requests
 import datetime
 import statistics
 import configparser
-import matplotlib.pyplot as pyplot
 import wx.lib.agw.hyperlink as hl
+import matplotlib.pyplot as pyplot
 from PIL import Image
 from threading import Timer
 from resizeimage import resizeimage
@@ -82,8 +82,7 @@ class CovStats():
         res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
         res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n'
-        res += 'totale nuovi positivi: ' + str(numpy.sum(values))
-        return res
+        return res + 'totale nuovi positivi: ' + str(numpy.sum(values))
 
 #----------------------------------------------------------------
     def loadConfig(self):
@@ -270,10 +269,7 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def checkTime(self):
-        if time.time() - self.last > 21600:
-            self.showData()
-        else:
-            self.startTimer(True)
+        self.showData() if time.time() - self.last > 21600 else self.startTimer(True)
 
 #----------------------------------------------------------------
     def OnCities(self, event):
