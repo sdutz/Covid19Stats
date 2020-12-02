@@ -39,19 +39,26 @@ class CovStats():
     def __init__(self):
         '''Constructor'''
         self.baseUrl = 'https://statistichecoronavirus.it'
+        self.url = self.baseUrl + '/coronavirus-italia/'
         self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
         base = os.path.realpath(__file__)[:-3]
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
-        
+#----------------------------------------------------------------
+    def getUrl(self, region, city):
+        if region == 'Trentino Alto Adige':
+            return self.url + 'coronavirus-pa-' + cleanName(city) +'/'
+        else:
+            return self.url + 'coronavirus-' + cleanName(region) + '/coronavirus-' + cleanName(city) +'/'
+
 #----------------------------------------------------------------
     def getStats(self, region, city):
         '''retrieve values from website'''
         if not is_connected():
             return False, 'nessuna connessione di rete presente'
         try:
-            page = requests.get(self.baseUrl + '/coronavirus-italia/coronavirus-' + cleanName(region) + '/coronavirus-' + cleanName(city) +'/')
+            page = requests.get(self.getUrl(region, city))
         except requests.exceptions.RequestException as e:
             return False, 'impossibile stabilire la connessione con la fonte\n' + str(e)
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
@@ -152,7 +159,7 @@ class CovWnd(wx.Frame):
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         self.graph.SetToolTip('premi r per aggiornare le statistiche')
         box.Add(self.graph, pos = (3, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (2, 2))
-        lnk = hl.HyperLinkCtrl(parent = self.panel, label = 'fonte: ' + self.stats.baseUrl, URL = self.stats.baseUrl)
+        lnk = hl.HyperLinkCtrl(parent = self.panel, label = 'fonte: ' + self.stats.baseUrl, URL = self.stats.url)
         box.Add(lnk, pos = (5, 0), flag = wx.EXPAND|wx.ALL, border = 5, span = (1, 2))
         about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'Made by sdutz')
         about.SetToolTip('premi q per uscire')
@@ -214,7 +221,7 @@ class CovWnd(wx.Frame):
         self.italy = {}
         self.italy["Abruzzo"]=sorted(["L'Aquila","Chieti","Pescara","Teramo"])
         self.italy["Basilicata"]=sorted(["Potenza","Matera"])
-        self.italy["Calabria"]=sorted(["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia Marina","Cosenza"])
+        self.italy["Calabria"]=sorted(["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia","Cosenza"])
         self.italy["Campania"]=sorted(["Napoli","Avellino","Caserta","Benevento","Salerno"])
         self.italy["Emilia Romagna"]=sorted(["Bologna","Reggio Emilia","Parma","Modena","Ferrara","Forlì Cesena","Piacenza","Ravenna","Rimini"])
         self.italy["Friuli Venezia Giulia"]=sorted(["Trieste","Gorizia","Pordenone","Udine"])
@@ -226,7 +233,7 @@ class CovWnd(wx.Frame):
         self.italy["Piemonte"]=sorted(["Torino","Asti","Alessandria","Cuneo","Novara","Vercelli","Verbania","Biella"])
         self.italy["Valle d'Aosta"]=["Aosta"]
         self.italy["Puglia"]=sorted(["Bari","Barletta-Andria-Trani","Brindisi","Foggia","Lecce","Taranto"])
-        self.italy["Sardegna"]=sorted(["Cagliari","Sassari","Nuoro","Oristano","Carbonia Iglesias","Medio Campidano","Olbia Tempio","Ogliastra"])
+        self.italy["Sardegna"]=sorted(["Cagliari","Sassari","Nuoro","Oristano","Sud Sardegna"])
         self.italy["Sicilia"]=sorted(["Palermo","Agrigento","Caltanissetta","Catania","Enna","Messina","Ragusa","Siracusa","Trapani"])
         self.italy["Toscana"]=sorted(["Arezzo","Massa Carrara","Firenze","Livorno","Grosseto","Lucca","Pisa","Pistoia","Prato","Siena"])
         self.italy["Trentino Alto Adige"]=sorted(["Trento","Bolzano"])
