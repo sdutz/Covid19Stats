@@ -85,10 +85,15 @@ class CovStats():
         res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
         diff = values[-1] - values[-2]
         diff = str(diff) if diff < 0 else '+' + str(diff)
-        res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ')\n'
-        res += 'statistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
+        res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ') '
+        m, M = min(values), max(values)
+        if values[-1] == m:
+            res += 'm'
+        elif values[-1] == M:
+            res += 'M'
+        res += '\nstatistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
         res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
-        res += 'minimo: ' + str(min(values)) + ', massimo: ' + str(max(values)) + '\n'
+        res += 'minimo: ' + str(m) + ', massimo: ' + str(M) + '\n'
         return res + 'totale nuovi positivi: ' + str(numpy.sum(values))
 
 #----------------------------------------------------------------
