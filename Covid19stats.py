@@ -15,9 +15,11 @@ import wx.lib.agw.hyperlink as hl
 import matplotlib.pyplot as pyplot
 from PIL import Image
 from threading import Timer
+from collections import namedtuple
 from resizeimage import resizeimage
 
 ver = '1.8'
+conf = namedtuple('conf', 'region city pos')
 
 #----------------------------------------------------------------
 def is_connected():
@@ -103,19 +105,19 @@ class CovStats():
         config.read(self.iniFile)
         if 'General' in config.sections():
             pos = (int(config["General"]["PosX"]), int(config["General"]["PosY"]))
-            return config["General"]["Region"], config["General"]["City"], pos
+            return conf(config["General"]["Region"], config["General"]["City"], pos)
         else:
-            return 'Lombardia', 'Bergamo', None
+            return conf('Lombardia', 'Bergamo', None)
 
 #----------------------------------------------------------------
-    def saveConfig(self, region, city, pos):
+    def saveConfig(self, cnf):
         '''Save configuration to ini file'''
         config = configparser.ConfigParser()
         config["General"] = {}
-        config["General"]["Region"] = region
-        config["General"]["City"] = city
-        config["General"]["PosX"] = str(pos[0])
-        config["General"]["PosY"] = str(pos[1])
+        config["General"]["Region"] = cnf.region
+        config["General"]["City"] = cnf.city
+        config["General"]["PosX"] = str(cnf.pos[0])
+        config["General"]["PosY"] = str(cnf.pos[1])
         with open(self.iniFile, 'w') as configFile:
             config.write(configFile)
 
@@ -129,13 +131,13 @@ class CovWnd(wx.Frame):
         super(CovWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initItaly()
         self.stats = CovStats()
-        region, city, pos = self.stats.loadConfig()
-        self.initUI(region, city)
+        cnf = self.stats.loadConfig()
+        self.initUI(cnf.region, cnf.city)
         self.timer, self.last = None, None
         self.showData()
         self.Centre() 
-        if pos:
-            self.SetPosition(pos)
+        if cnf.pos:
+            self.SetPosition(cnf.pos)
         self.Show()
 
 #----------------------------------------------------------------
@@ -181,7 +183,7 @@ class CovWnd(wx.Frame):
         '''on Close event'''
         region = self.regions.GetString(self.regions.GetSelection())
         city = self.cities.GetString(self.cities.GetSelection())
-        self.stats.saveConfig(region, city, self.Position)
+        self.stats.saveConfig(conf(region, city, self.Position))
         if self.timer:
             self.timer.cancel()
         self.Destroy()
