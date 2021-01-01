@@ -18,6 +18,7 @@ from threading import Timer
 from collections import namedtuple
 from resizeimage import resizeimage
 
+#----------------------------------------------------------------
 ver = '1.8'
 conf = namedtuple('conf', 'region city pos')
 
@@ -32,6 +33,7 @@ def is_connected():
 
 #----------------------------------------------------------------
 def cleanName(name):
+    '''trim unwanter chars from name'''
     return name.lower().replace(' ', '-').replace('\'', '-')
 
 
@@ -49,7 +51,10 @@ class CovStats():
         self.respic = base + 'res.png'
 #----------------------------------------------------------------
     def getUrl(self, region, city):
-        if region == 'Trentino Alto Adige':
+        '''get url starting from current region and city'''
+        if not city:
+            return self.url
+        elif region == 'Trentino Alto Adige':
             return self.url + 'coronavirus-pa-' + cleanName(city) +'/'
         else:
             return self.url + 'coronavirus-' + cleanName(region) + '/coronavirus-' + cleanName(city) +'/'
@@ -60,7 +65,7 @@ class CovStats():
         if not is_connected():
             return False, 'nessuna connessione di rete presente'
         try:
-            page = requests.get(self.url if not city else self.getUrl(region, city))
+            page = requests.get(self.getUrl(region, city))
         except requests.exceptions.RequestException as e:
             return False, 'impossibile stabilire la connessione con la fonte\n' + str(e)
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
@@ -149,6 +154,7 @@ class CovWnd(wx.Frame):
         static = wx.StaticText(self.panel, label = 'Regione', style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
         self.regions = wx.Choice(self.panel, choices = regions)
+        self.regions.SetToolTip('premi i per i dati di tutta Italia')
         self.regions.SetSelection(regions.index(region))
         box.Add(self.regions, pos = (0, 1), flag = wx.EXPAND|wx.ALL, border = 5) 
 
@@ -198,6 +204,17 @@ class CovWnd(wx.Frame):
             self.Close()
         elif code == ord('r'):
             self.showData()
+        elif code == ord('i'):
+            self.showItaly() ;
+
+#----------------------------------------------------------------
+    def showItaly(self):
+        '''show total data of Italy'''
+        idx = list(self.italy.keys()).index('Italia')
+        self.regions.SetSelection(idx)
+        self.cities.SetItems(self.italy['Italia'])
+        self.cities.SetSelection(0)
+        self.showData()
 
 #----------------------------------------------------------------
     def onSearch(self):
@@ -250,6 +267,7 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def OnRegions(self, event):
+        '''on changed region selection'''
         self.cities.SetItems(self.italy[self.regions.GetString(self.regions.GetSelection())])
         self.cities.SetSelection(0)
         self.showData()
@@ -276,22 +294,26 @@ class CovWnd(wx.Frame):
         self.startTimer(True)
 
 #----------------------------------------------------------------
-    def startTimer(self, read):
+    def startTimer(self, ok):
+        '''start timer for background operation'''
         if self.timer:
             self.timer.cancel()
-        self.timer = Timer(60, self.showData) if not read else Timer(30, self.checkTime)
+        self.timer = Timer(60, self.showData) if not ok else Timer(30, self.checkTime)
         self.timer.start()
 
 #----------------------------------------------------------------
     def checkTime(self):
+        '''check timer for background operations'''
         self.showData() if time.time() - self.last > 21600 else self.startTimer(True)
 
 #----------------------------------------------------------------
     def OnCities(self, event):
+        '''on changed city selection'''
         self.showData()
 
 #----------------------------------------------------------------
-if __name__ == "__main__":              
+if __name__ == "__main__":
+    '''main'''
     app = wx.App()
     CovWnd(None, 'Bilancio Covid ' + ver) 
     app.MainLoop()
