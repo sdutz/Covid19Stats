@@ -60,13 +60,13 @@ class CovStats():
         if not is_connected():
             return False, 'nessuna connessione di rete presente'
         try:
-            page = requests.get(self.getUrl(region, city))
+            page = requests.get(self.url if not city else self.getUrl(region, city))
         except requests.exceptions.RequestException as e:
             return False, 'impossibile stabilire la connessione con la fonte\n' + str(e)
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
             return False, 'dati non disponibili per: '+ region + ' ' + city
-        res = allData[3]
+        res = allData[9 if not city else 3]
         values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
         self.calcGraph(values)
         return True, self.calcStats(values)
@@ -232,6 +232,7 @@ class CovWnd(wx.Frame):
         self.italy["Campania"]=sorted(["Napoli","Avellino","Caserta","Benevento","Salerno"])
         self.italy["Emilia Romagna"]=sorted(["Bologna","Reggio Emilia","Parma","Modena","Ferrara","Forlì Cesena","Piacenza","Ravenna","Rimini"])
         self.italy["Friuli Venezia Giulia"]=sorted(["Trieste","Gorizia","Pordenone","Udine"])
+        self.italy["Italia"]=[""]
         self.italy["Lazio"]=sorted(["Roma","Latina","Frosinone","Viterbo","Rieti"])
         self.italy["Liguria"]=sorted(["Genova","Imperia","La Spezia","Savona"])
         self.italy["Lombardia"]=sorted(["Milano","Bergamo","Brescia","Como","Cremona","Mantova","Monza Brianza","Pavia","Sondrio","Lodi","Lecco","Varese"])
