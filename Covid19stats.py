@@ -19,7 +19,7 @@ from collections import namedtuple
 from resizeimage import resizeimage
 
 #----------------------------------------------------------------
-ver = '1.8'
+ver = '1.9'
 conf = namedtuple('conf', 'region city pos')
 
 #----------------------------------------------------------------
@@ -49,6 +49,7 @@ class CovStats():
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
+        self.config = configparser.ConfigParser()
 
 #----------------------------------------------------------------
     def getUrl(self, region, city):
@@ -107,39 +108,38 @@ class CovStats():
 #----------------------------------------------------------------
     def loadConfig(self):
         '''Load configuration from ini file'''
-        config = configparser.ConfigParser()
-        config.read(self.iniFile)
-        if 'General' in config.sections():
-            pos = (int(config["General"]["PosX"]), int(config["General"]["PosY"]))
-            return conf(config["General"]["Region"], config["General"]["City"], pos)
+        self.config.read(self.iniFile)
+        if 'General' in self.config.sections():
+            pos = (int(self.config["General"]["PosX"]), int(self.config["General"]["PosY"]))
+            return conf(self.config["General"]["Region"], self.config["General"]["City"], pos)
         else:
             return conf('Lombardia', 'Bergamo', None)
 
 #----------------------------------------------------------------
     def saveConfig(self, cnf):
         '''Save configuration to ini file'''
-        config = configparser.ConfigParser()
-        config["General"] = {}
-        config["General"]["Region"] = cnf.region
-        config["General"]["City"] = cnf.city
-        config["General"]["PosX"] = str(cnf.pos[0])
-        config["General"]["PosY"] = str(cnf.pos[1])
+        self.config["General"] = {}
+        self.config["General"]["Region"] = cnf.region
+        self.config["General"]["City"] = cnf.city
+        self.config["General"]["PosX"] = str(cnf.pos[0])
+        self.config["General"]["PosY"] = str(cnf.pos[1])
         with open(self.iniFile, 'w') as configFile:
-            config.write(configFile)
+            self.config.write(configFile)
 
 
 #----------------------------------------------------------------
 class CovWnd(wx.Frame): 
     '''Main Window class'''
+
     def __init__(self, parent, title):
         '''Constructor'''
         self.size = (250, 420)
         super(CovWnd, self).__init__(parent, title = title, size = self.size, style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.initItaly()
         self.stats = CovStats()
-        cnf = self.stats.loadConfig()
         self.initUI()
         self.timer, self.last = None, None
+        cnf = self.stats.loadConfig()
         self.doShow(cnf.region, cnf.city)
         self.Centre() 
         if cnf.pos:
