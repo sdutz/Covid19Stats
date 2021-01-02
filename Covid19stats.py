@@ -205,6 +205,15 @@ class CovWnd(wx.Frame):
             self.doShow('Italia', '')
         elif code == ord('d'):
             self.doShow('Lombardia', 'Bergamo')
+        elif code == ord('h'):
+            self.showHelp()
+
+#----------------------------------------------------------------
+    def showHelp(self):
+        '''show help message box'''
+        text = 'Elenco comandi:\nf per cercare\nq per uscire\nr per ricaricare\ni per Italia\n'
+        text += 'd per default\n h per questa finestra'
+        wx.MessageBox(text, parent=self, caption='Aiuto')
 
 #----------------------------------------------------------------
     def doShow(self, region, city):
@@ -221,7 +230,7 @@ class CovWnd(wx.Frame):
         dlg = wx.TextEntryDialog(self, 'Cerca la città')
         if (dlg.ShowModal() == wx.ID_OK):
             if not self.doSearch(dlg.GetValue()):
-                wx.MessageBox('Nessun risultato trovato!', parent=self)
+                wx.MessageBox('Nessun risultato trovato!', parent=self, caption='Errore')
         dlg.Destroy()
 
 #----------------------------------------------------------------
