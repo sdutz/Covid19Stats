@@ -5,15 +5,15 @@ import wx
 import re
 import os
 import time
-import numpy
 import socket
 import requests
 import datetime
-import statistics
 import configparser
 import wx.lib.agw.hyperlink as hl
 import matplotlib.pyplot as pyplot
 from PIL import Image
+from numpy import sum, diff
+from statistics import mean
 from threading import Timer
 from collections import namedtuple
 from resizeimage import resizeimage
@@ -81,7 +81,7 @@ class CovStats():
 #----------------------------------------------------------------
     def calcGraph(self, values):
         '''plot graph'''
-        pyplot.plot(numpy.diff(values))
+        pyplot.plot(diff(values))
         pyplot.ylabel('')
         pyplot.xlabel('')
         pyplot.savefig(self.pic)
@@ -101,9 +101,9 @@ class CovStats():
         elif values[-1] == M:
             res += 'M'
         res += '\nstatistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
-        res += 'media giornaliera: ' + str(round(statistics.mean(values))) + '\n'
+        res += 'media giornaliera: ' + str(round(mean(values))) + '\n'
         res += 'minimo: ' + str(m) + ', massimo: ' + str(M) + '\n'
-        return res + 'totale nuovi positivi: ' + str(numpy.sum(values))
+        return res + 'totale nuovi positivi: ' + str(sum(values))
 
 #----------------------------------------------------------------
     def loadConfig(self):
