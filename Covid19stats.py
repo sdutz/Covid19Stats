@@ -49,6 +49,7 @@ class CovStats():
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
         self.respic = base + 'res.png'
+
 #----------------------------------------------------------------
     def getUrl(self, region, city):
         '''get url starting from current region and city'''
@@ -137,33 +138,29 @@ class CovWnd(wx.Frame):
         self.initItaly()
         self.stats = CovStats()
         cnf = self.stats.loadConfig()
-        self.initUI(cnf.region, cnf.city)
+        self.initUI()
         self.timer, self.last = None, None
-        self.showData()
+        self.doShow(cnf.region, cnf.city)
         self.Centre() 
         if cnf.pos:
             self.SetPosition(cnf.pos)
         self.Show()
 
 #----------------------------------------------------------------
-    def initUI(self, region, city):
+    def initUI(self):
         '''Init of user interface'''
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
-        regions = list(self.italy.keys())
         static = wx.StaticText(self.panel, label = 'Regione', style = wx.LEFT) 
         box.Add(static, pos = (0, 0), flag = wx.EXPAND|wx.ALL, border = 5)
-        self.regions = wx.Choice(self.panel, choices = regions)
-        self.regions.SetToolTip('premi i per i dati di tutta Italia')
-        self.regions.SetSelection(regions.index(region))
+        self.regions = wx.Choice(self.panel, choices = list(self.italy.keys()))
+        self.regions.SetToolTip('premi i per i dati di tutta Italia, d per default')
         box.Add(self.regions, pos = (0, 1), flag = wx.EXPAND|wx.ALL, border = 5) 
 
         static = wx.StaticText(self.panel, label = 'Provincia', style = wx.ALIGN_LEFT)   
         box.Add(static, pos = (1, 0), flag = wx.EXPAND|wx.ALL, border = 5)
-        cities = list(self.italy[region])
-        self.cities = wx.Choice(self.panel, choices = cities)
+        self.cities = wx.Choice(self.panel)
         self.cities.SetToolTip('premi f per cercare una provincia')
-        self.cities.SetSelection(cities.index(city))
         box.Add(self.cities, pos = (1, 1), flag = wx.EXPAND|wx.ALL, border = 5)
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
@@ -205,15 +202,17 @@ class CovWnd(wx.Frame):
         elif code == ord('r'):
             self.showData()
         elif code == ord('i'):
-            self.showItaly() ;
+            self.doShow('Italia', '')
+        elif code == ord('d'):
+            self.doShow('Lombardia', 'Bergamo')
 
 #----------------------------------------------------------------
-    def showItaly(self):
+    def doShow(self, region, city):
         '''show total data of Italy'''
-        idx = list(self.italy.keys()).index('Italia')
+        idx = list(self.italy.keys()).index(region)
         self.regions.SetSelection(idx)
-        self.cities.SetItems(self.italy['Italia'])
-        self.cities.SetSelection(0)
+        self.cities.SetItems(self.italy[region])
+        self.cities.SetSelection(0 if not city else self.italy[region].index(city))
         self.showData()
 
 #----------------------------------------------------------------
@@ -228,15 +227,10 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def doSearch(self, city):
         '''perform serch of a city'''
-        idx = 0
         for region in self.italy:
             if city in self.italy[region]:
-                self.regions.SetSelection(idx)
-                self.cities.SetItems(self.italy[region])
-                self.cities.SetSelection(self.italy[region].index(city))
-                self.showData()
+                self.doShow(region, city)
                 return True
-            idx += 1
         return False
 
 #----------------------------------------------------------------
