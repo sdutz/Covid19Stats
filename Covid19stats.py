@@ -202,7 +202,7 @@ class CovWnd(wx.Frame):
         elif code == ord('r'):
             self.showData()
         elif code == ord('i'):
-            self.doShow('Italia', '')
+            self.doShow('Italia')
         elif code == ord('d'):
             self.doShow('Lombardia', 'Bergamo')
         elif code == ord('h'):
@@ -216,7 +216,7 @@ class CovWnd(wx.Frame):
         wx.MessageBox(text, parent=self, caption='Aiuto')
 
 #----------------------------------------------------------------
-    def doShow(self, region, city):
+    def doShow(self, region, city = None):
         '''show total data of Italy'''
         idx = list(self.italy.keys()).index(region)
         self.regions.SetSelection(idx)
