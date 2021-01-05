@@ -236,10 +236,12 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def doSearch(self, city):
         '''perform serch of a city'''
+        name = city.lower()
         for region in self.italy:
-            if city in self.italy[region]:
-                self.doShow(region, city)
-                return True
+            for curr in self.italy[region]:
+                if name == curr.lower():
+                    self.doShow(region, curr)
+                    return True
         return False
 
 #----------------------------------------------------------------
