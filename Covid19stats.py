@@ -8,6 +8,7 @@ import time
 import socket
 import requests
 import datetime
+import platform
 import configparser
 import wx.lib.agw.hyperlink as hl
 import matplotlib.pyplot as pyplot
@@ -15,12 +16,15 @@ from PIL import Image
 from numpy import sum, diff
 from statistics import mean
 from threading import Timer
+from subprocess import check_call
 from collections import namedtuple
 from resizeimage import resizeimage
 
 #----------------------------------------------------------------
 ver = '1.9'
 conf = namedtuple('conf', 'region city pos')
+oss = ['Darwin', 'Windows', 'Linux']
+copy = ['pbcopy', 'clip', 'xclip']
 
 #----------------------------------------------------------------
 def is_connected():
@@ -165,7 +169,7 @@ class CovWnd(wx.Frame):
         box.Add(self.cities, pos = (1, 1), **defaults)
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
-        self.result.SetToolTip('premi r per aggiornare le statistiche')
+        self.result.SetToolTip('premi r per aggiornare le statistiche, c per copiarne il contenuto')
         box.Add(self.result, pos = (2, 0), **defaults, span = (1, 2))
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         self.graph.SetToolTip('premi r per aggiornare le statistiche')
@@ -208,12 +212,20 @@ class CovWnd(wx.Frame):
             self.doShow('Lombardia', 'Bergamo')
         elif code == ord('h'):
             self.showHelp()
+        elif code == ord('c'):
+            self.doCopy()
+
+#----------------------------------------------------------------
+    def doCopy(self):
+        idx = oss.index(platform.system())
+        txt = "\"" + self.result.GetLabelText().strip() + "\""
+        return check_call('echo '+ txt +'|' + copy[idx], shell=True)
 
 #----------------------------------------------------------------
     def showHelp(self):
         '''show help message box'''
         text = 'Elenco comandi:\nf per cercare\nq per uscire\nr per ricaricare\ni per Italia\n'
-        text += 'd per default\n h per questa finestra'
+        text += 'd per default\nc per copiare il risultato\nh per questa finestra'
         wx.MessageBox(text, parent=self, caption='Aiuto')
 
 #----------------------------------------------------------------
