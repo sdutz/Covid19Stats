@@ -1,15 +1,7 @@
 '''Module to retrieve daily report about Corona Virus in Italy'''
 
 #----------------------------------------------------------------
-import wx
-import re
-import os
-import time
-import socket
-import requests
-import datetime
-import platform
-import configparser
+import wx, re, os, time, socket, requests, datetime, platform, configparser
 import wx.lib.agw.hyperlink as hl
 import matplotlib.pyplot as pyplot
 from PIL import Image
