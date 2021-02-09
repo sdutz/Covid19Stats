@@ -40,7 +40,7 @@ class CovStats():
         '''Constructor'''
         self.baseUrl = 'https://statistichecoronavirus.it'
         self.url = self.baseUrl + '/coronavirus-italia/'
-        self.days = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"]
+        self.days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
         base = os.path.realpath(__file__)[:-3]
         self.iniFile = base + '.ini'
         self.pic = base + '.png'
@@ -145,32 +145,35 @@ class CovWnd(wx.Frame):
 #----------------------------------------------------------------
     def initUI(self):
         '''Init of user interface'''
+        pos = [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (3, 0), (5, 0), (6, 0)]
+        spans = [(1, 2), (2, 2)]
+
         defaults = dict(flag = wx.EXPAND|wx.ALL, border = 5)
         self.panel = wx.Panel(self) 
         box = wx.GridBagSizer()
         static = wx.StaticText(self.panel, label = 'Regione', style = wx.LEFT) 
-        box.Add(static, pos = (0, 0), **defaults)
+        box.Add(static, pos[0], **defaults)
         self.regions = wx.Choice(self.panel, choices = list(self.italy.keys()))
         self.regions.SetToolTip('premi i per i dati di tutta Italia, d per default')
-        box.Add(self.regions, pos = (0, 1), **defaults) 
+        box.Add(self.regions, pos[1], **defaults) 
 
         static = wx.StaticText(self.panel, label = 'Provincia', style = wx.ALIGN_LEFT)   
-        box.Add(static, pos = (1, 0), **defaults)
+        box.Add(static, pos[2], **defaults)
         self.cities = wx.Choice(self.panel)
         self.cities.SetToolTip('premi f per cercare una provincia')
-        box.Add(self.cities, pos = (1, 1), **defaults)
+        box.Add(self.cities, pos[3], **defaults)
 
         self.result = wx.StaticText(self.panel, style = wx.ALIGN_CENTER)
         self.result.SetToolTip('premi r per aggiornare le statistiche, c per copiarne il contenuto')
-        box.Add(self.result, pos = (2, 0), **defaults, span = (1, 2))
+        box.Add(self.result, pos[4], spans[0], **defaults)
         self.graph = wx.StaticBitmap(self.panel, style = wx.ALIGN_CENTER)
         self.graph.SetToolTip('premi r per aggiornare le statistiche')
-        box.Add(self.graph, pos = (3, 0), **defaults, span = (2, 2))
+        box.Add(self.graph, pos[5], spans[1], **defaults)
         lnk = hl.HyperLinkCtrl(parent = self.panel, label = 'fonte: ' + self.stats.baseUrl, URL = self.stats.url)
-        box.Add(lnk, pos = (5, 0), **defaults, span = (1, 2))
+        box.Add(lnk, pos[6], spans[0], **defaults)
         about = wx.StaticText(self.panel, style = wx.ALIGN_CENTER, label = 'Made by sdutz')
         about.SetToolTip('premi q per uscire')
-        box.Add(about, pos = (6, 0), **defaults, span = (1, 2))
+        box.Add(about, pos[7], spans[0], **defaults)
 
         self.regions.Bind(wx.EVT_CHOICE, self.OnRegions) 
         self.cities.Bind(wx.EVT_CHOICE, self.OnCities)
@@ -253,27 +256,27 @@ class CovWnd(wx.Frame):
     def initItaly(self):
         '''init of all regions and cities of Italy'''
         self.italy = {}
-        self.italy["Abruzzo"]=sorted(["L'Aquila","Chieti","Pescara","Teramo"])
-        self.italy["Basilicata"]=sorted(["Potenza","Matera"])
-        self.italy["Calabria"]=sorted(["Reggio Calabria","Catanzaro","Crotone","Vibo Valentia","Cosenza"])
-        self.italy["Campania"]=sorted(["Napoli","Avellino","Caserta","Benevento","Salerno"])
-        self.italy["Emilia Romagna"]=sorted(["Bologna","Reggio Emilia","Parma","Modena","Ferrara","Forlì Cesena","Piacenza","Ravenna","Rimini"])
-        self.italy["Friuli Venezia Giulia"]=sorted(["Trieste","Gorizia","Pordenone","Udine"])
+        self.italy["Abruzzo"]=sorted(["L'Aquila", "Chieti", "Pescara", "Teramo"])
+        self.italy["Basilicata"]=sorted(["Potenza", "Matera"])
+        self.italy["Calabria"]=sorted(["Reggio Calabria", "Catanzaro", "Crotone", "Vibo Valentia", "Cosenza"])
+        self.italy["Campania"]=sorted(["Napoli", "Avellino", "Caserta", "Benevento", "Salerno"])
+        self.italy["Emilia Romagna"]=sorted(["Bologna", "Reggio Emilia", "Parma", "Modena", "Ferrara", "Forlì Cesena", "Piacenza", "Ravenna", "Rimini"])
+        self.italy["Friuli Venezia Giulia"]=sorted(["Trieste", "Gorizia", "Pordenone", "Udine"])
         self.italy["Italia"]=[""]
-        self.italy["Lazio"]=sorted(["Roma","Latina","Frosinone","Viterbo","Rieti"])
-        self.italy["Liguria"]=sorted(["Genova","Imperia","La Spezia","Savona"])
-        self.italy["Lombardia"]=sorted(["Milano","Bergamo","Brescia","Como","Cremona","Mantova","Monza Brianza","Pavia","Sondrio","Lodi","Lecco","Varese"])
-        self.italy["Marche"]=sorted(["Ancona","Ascoli Piceno","Fermo","Macerata","Pesaro Urbino"])
-        self.italy["Molise"]=sorted(["Campobasso","Isernia"])
-        self.italy["Piemonte"]=sorted(["Torino","Asti","Alessandria","Cuneo","Novara","Vercelli","Verbania","Biella"])
+        self.italy["Lazio"]=sorted(["Roma", "Latina", "Frosinone", "Viterbo", "Rieti"])
+        self.italy["Liguria"]=sorted(["Genova", "Imperia", "La Spezia", "Savona"])
+        self.italy["Lombardia"]=sorted(["Milano", "Bergamo", "Brescia", "Como", "Cremona", "Mantova", "Monza Brianza", "Pavia", "Sondrio", "Lodi", "Lecco", "Varese"])
+        self.italy["Marche"]=sorted(["Ancona", "Ascoli Piceno", "Fermo", "Macerata", "Pesaro Urbino"])
+        self.italy["Molise"]=sorted(["Campobasso", "Isernia"])
+        self.italy["Piemonte"]=sorted(["Torino", "Asti", "Alessandria", "Cuneo", "Novara", "Vercelli", "Verbania", "Biella"])
         self.italy["Valle d'Aosta"]=["Aosta"]
-        self.italy["Puglia"]=sorted(["Bari","Barletta-Andria-Trani","Brindisi","Foggia","Lecce","Taranto"])
-        self.italy["Sardegna"]=sorted(["Cagliari","Sassari","Nuoro","Oristano","Sud Sardegna"])
-        self.italy["Sicilia"]=sorted(["Palermo","Agrigento","Caltanissetta","Catania","Enna","Messina","Ragusa","Siracusa","Trapani"])
-        self.italy["Toscana"]=sorted(["Arezzo","Massa Carrara","Firenze","Livorno","Grosseto","Lucca","Pisa","Pistoia","Prato","Siena"])
-        self.italy["Trentino Alto Adige"]=sorted(["Trento","Bolzano"])
-        self.italy["Umbria"]=sorted(["Perugia","Terni"])
-        self.italy["Veneto"]=sorted(["Venezia","Belluno","Padova","Rovigo","Treviso","Verona","Vicenza"])
+        self.italy["Puglia"]=sorted(["Bari", "Barletta-Andria-Trani", "Brindisi", "Foggia", "Lecce", "Taranto"])
+        self.italy["Sardegna"]=sorted(["Cagliari", "Sassari", "Nuoro", "Oristano", "Sud Sardegna"])
+        self.italy["Sicilia"]=sorted(["Palermo", "Agrigento", "Caltanissetta", "Catania", "Enna", "Messina", "Ragusa", "Siracusa", "Trapani"])
+        self.italy["Toscana"]=sorted(["Arezzo", "Massa Carrara", "Firenze", "Livorno", "Grosseto", "Lucca", "Pisa", "Pistoia", "Prato", "Siena"])
+        self.italy["Trentino Alto Adige"]=sorted(["Trento", "Bolzano"])
+        self.italy["Umbria"]=sorted(["Perugia", "Terni"])
+        self.italy["Veneto"]=sorted(["Venezia", "Belluno", "Padova", "Rovigo", "Treviso", "Verona", "Vicenza"])
 
 #----------------------------------------------------------------
     def OnRegions(self, event):
