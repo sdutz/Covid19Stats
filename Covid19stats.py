@@ -214,7 +214,7 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def doSpeech(self):
-        return check_call('espeak \"' + self.result.GetLabelText().strip() + "\"", shell=True)
+        return check_call('espeak -vit \"' + self.result.GetLabelText().strip() + "\"", shell=True)
 
 #----------------------------------------------------------------
     def doCopy(self):
