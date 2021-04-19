@@ -214,10 +214,12 @@ class CovWnd(wx.Frame):
 
 #----------------------------------------------------------------
     def doSpeech(self):
+        '''Speech using espeak'''
         return check_call('espeak -vit \"' + self.result.GetLabelText().strip() + "\"", shell=True)
 
 #----------------------------------------------------------------
     def doCopy(self):
+        '''Copy to clipboard'''
         idx = oss.index(platform.system())
         txt = "\"" + self.result.GetLabelText().strip() + "\""
         return check_call('echo '+ txt +'|' + copy[idx], shell=True)
