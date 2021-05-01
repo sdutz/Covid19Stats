@@ -211,6 +211,25 @@ class CovWnd(wx.Frame):
             self.doCopy()
         elif code == ord('s'):
             self.doSpeech()
+        elif code == ord('e'):
+            self.doExport()
+
+#----------------------------------------------------------------
+    def doExport(self):
+        '''Export stats to file'''
+        with wx.FileDialog(self, "Esporta", wildcard="txt files (*.txt)|*.txt", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return
+
+            # save the current contents in the file
+            pathname = fileDialog.GetPath()
+            try:
+                with open(pathname, 'w') as file:
+                    file.write(self.result.GetLabelText().strip())
+                    file.close()
+            except IOError:
+                wx.LogError("Impossibile salvare il file '%s'." % pathname)
 
 #----------------------------------------------------------------
     def doSpeech(self):
