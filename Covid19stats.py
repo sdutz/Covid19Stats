@@ -247,7 +247,7 @@ class CovWnd(wx.Frame):
     def showHelp(self):
         '''show help message box'''
         text = 'Elenco comandi:\nf per cercare\nq per uscire\nr per ricaricare\ni per Italia\n'
-        text += 'd per default\ns per audio per non vedenti\nc per copiare il risultato\nh per questa finestra'
+        text += 'd per default\ns per audio per non vedenti\nc per copiare il risultato\ne per esportare il risultato\nh per questa finestra'
         wx.MessageBox(text, parent=self, caption='Aiuto')
 
 #----------------------------------------------------------------
