@@ -88,9 +88,11 @@ class CovStats():
         '''performs stats'''
         today = datetime.date.today()
         res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
+        res += str(values[-1]) + ' ultimi nuovi positivi'
         diff = values[-1] - values[-2]
-        diff = str(diff) if diff < 0 else '+' + str(diff)
-        res += str(values[-1]) + ' ultimi nuovi positivi ('  + diff + ') '
+        if diff != 0:
+            diff = str(diff) if diff < 0 else '+' + str(diff)
+            res += ' (' + diff + ') '
         m, M = min(values), max(values)
         if values[-1] == m:
             res += 'm'
