@@ -46,6 +46,7 @@ class CovStats():
         self.pic = base + '.png'
         self.respic = base + 'res.png'
         self.config = configparser.ConfigParser()
+        self.values = []
 
 #----------------------------------------------------------------
     def getUrl(self, region, city):
@@ -70,38 +71,39 @@ class CovStats():
         if len(allData) < 4:
             return False, 'dati non disponibili per: '+ region + ' ' + city
         res = allData[9 if not city else 3]
-        values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
-        self.calcGraph(values)
-        return True, self.calcStats(values)
+        self.values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+        self.calcGraph()
+        print(self.values)
+        return True, self.calcStats()
 
 #----------------------------------------------------------------
-    def calcGraph(self, values):
+    def calcGraph(self):
         '''plot graph'''
-        pyplot.plot(diff(values))
+        pyplot.plot(diff(self.values))
         pyplot.ylabel('')
         pyplot.xlabel('')
         pyplot.savefig(self.pic)
         pyplot.close()
 
 #----------------------------------------------------------------
-    def calcStats(self, values):
+    def calcStats(self):
         '''performs stats'''
         today = datetime.date.today()
         res = self.days[today.weekday()] + ' ' + str(today.strftime('%d/%m/%Y')) + '\n'
-        res += str(values[-1]) + ' ultimi nuovi positivi'
-        diff = values[-1] - values[-2]
+        res += str(self.values[-1]) + ' ultimi nuovi positivi'
+        diff = self.values[-1] - self.values[-2]
         if diff != 0:
             diff = str(diff) if diff < 0 else '+' + str(diff)
             res += ' (' + diff + ') '
-        m, M = min(values), max(values)
-        if values[-1] == m:
+        m, M = min(self.values), max(self.values)
+        if self.values[-1] == m:
             res += 'm'
-        elif values[-1] == M:
+        elif self.values[-1] == M:
             res += 'M'
-        res += '\nstatistiche sugli ultimi ' + str(len(values)) + ' giorni:' + '\n'
-        res += 'media giornaliera: ' + str(round(mean(values))) + '\n'
+        res += '\nstatistiche sugli ultimi ' + str(len(self.values)) + ' giorni:' + '\n'
+        res += 'media giornaliera: ' + str(round(mean(self.values))) + '\n'
         res += 'minimo: ' + str(m) + ', massimo: ' + str(M) + '\n'
-        return res + 'totale nuovi positivi: ' + str(sum(values))
+        return res + 'totale nuovi positivi: ' + str(sum(self.values))
 
 #----------------------------------------------------------------
     def loadConfig(self):
