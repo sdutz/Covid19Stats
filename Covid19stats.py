@@ -331,6 +331,7 @@ class CovWnd(wx.Frame):
             resized = resizeimage.resize_cover(image, (self.size[0] - 50, 150))
             resized.save(self.stats.respic, image.format)
         self.graph.SetBitmap(wx.Bitmap(self.stats.respic))
+        self.graph.SetToolTip('Values: ' + str(self.stats.values))
         print('retrieved in ' + str(time.process_time() - start) + ' s')
         self.last = time.time()
         self.panel.SetSize(self.size)
