@@ -5,7 +5,7 @@ import wx, re, os, time, socket, requests, datetime, platform, configparser
 import wx.lib.agw.hyperlink as hl
 import matplotlib.pyplot as pyplot
 from PIL import Image
-from numpy import sum, diff
+from numpy import sum
 from statistics import mean
 from threading import Timer
 from subprocess import check_call
@@ -70,8 +70,8 @@ class CovStats():
         allData = re.findall(r'data:.*', page.text, re.MULTILINE)
         if len(allData) < 4:
             return False, 'dati non disponibili per: '+ region + ' ' + city
-        res = allData[9 if not city else 3]
-        self.values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')]
+        res = allData[9 if not city else 0]
+        self.values = [int(x) for x in res[res.find('[') + 1 : res.find(']') - 1].split(',')][0:8]
         self.calcGraph()
         print(self.values)
         return True, self.calcStats()
@@ -79,7 +79,7 @@ class CovStats():
 #----------------------------------------------------------------
     def calcGraph(self):
         '''plot graph'''
-        pyplot.plot(diff(self.values))
+        pyplot.plot(self.values)
         pyplot.ylabel('')
         pyplot.xlabel('')
         pyplot.savefig(self.pic)
@@ -100,8 +100,8 @@ class CovStats():
             res += 'm'
         elif self.values[-1] == M:
             res += 'M'
-        res += '\nstatistiche sugli ultimi ' + str(len(self.values)) + ' giorni:' + '\n'
-        res += 'media giornaliera: ' + str(round(mean(self.values))) + '\n'
+        res += '\nstatistiche sugli ultime ' + str(len(self.values)) + ' settimane:' + '\n'
+        res += 'media giornaliera: ' + str(round(mean(self.values)/7)) + '\n'
         res += 'minimo: ' + str(m) + ', massimo: ' + str(M) + '\n'
         return res + 'totale nuovi positivi: ' + str(sum(self.values))
 
